@@ -2,21 +2,24 @@ package com.fitness.activityservice.service;
 
 import com.fitness.activityservice.dto.ActivityRequest;
 import com.fitness.activityservice.dto.ActivityResponse;
+import com.fitness.activityservice.messaging.producer.ActivityMessageProducer;
 import com.fitness.activityservice.model.Activity;
 import com.fitness.activityservice.repository.ActivityRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.jspecify.annotations.Nullable;
-import org.springframework.data.domain.Example;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class ActivityService {
 
     private final ActivityRepository activityRepository;
     private final UserValidationService userValidationService;
+    private final ActivityMessageProducer activityMessageProducer;
 
     public ActivityResponse createActivity(ActivityRequest requestActivity) {
         boolean userExist = userValidationService.validateUser(requestActivity.getUserId());
@@ -31,9 +34,11 @@ public class ActivityService {
                 .metrics(requestActivity.getMetrics())
                 .caloriesBurned(requestActivity.getCaloriesBurned())
                 .build();
-        System.out.println(activity);
         Activity savedActivity = activityRepository.save(activity);
-        System.out.println(savedActivity);
+
+        //push to rabbitmq
+        activityMessageProducer.sendActivity(savedActivity);
+
         return mapToResponse(savedActivity);
     }
 

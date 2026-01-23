@@ -1,6 +1,7 @@
 package com.fitness.activityservice.listener;
 
 import com.fitness.activityservice.model.Activity;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.mongodb.core.mapping.event.AbstractMongoEventListener;
 import org.springframework.data.mongodb.core.mapping.event.BeforeConvertEvent;
 import org.springframework.stereotype.Component;
